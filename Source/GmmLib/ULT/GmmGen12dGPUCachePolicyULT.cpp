@@ -49,7 +49,7 @@ void CTestGen12dGPUCachePolicy::SetUpGen12dGPUVariant(PRODUCT_FAMILY platform)
 
     GfxPlatform.eProductFamily = platform;
 
-    GfxPlatform.eRenderCoreFamily = IGFX_XE_HP_CORE;
+    GfxPlatform.eRenderCoreFamily = IGFX_XE_HPG_CORE;
 
     pGfxAdapterInfo = (ADAPTER_INFO *)malloc(sizeof(ADAPTER_INFO));
     if(pGfxAdapterInfo)
@@ -145,6 +145,10 @@ void CTestGen12dGPUCachePolicy::CheckL3Gen12dGPUCachePolicy()
 
         //printf("Usage: %d --> Index: [%d]\n", Usage, AssignedMocsIdx);
 
+	if(GfxPlatform.eProductFamily == IGFX_DG2)
+        {
+            StartMocsIdx = 0;
+        }
         if(StartMocsIdx == 1)
         {
             EXPECT_NE(0, AssignedMocsIdx) << "Usage# " << Usage << ": Misprogramming MOCS - Index 0 is reserved for Error";
@@ -161,8 +165,8 @@ void CTestGen12dGPUCachePolicy::CheckL3Gen12dGPUCachePolicy()
             CheckMocsIdxHDCL1(Usage, AssignedMocsIdx, ClientRequest);
         }
 
-        if(GfxPlatform.eProductFamily <= IGFX_XE_HP_SDV)
-        {
+        if(GfxPlatform.eProductFamily < IGFX_DG2)
+	{
             CheckSpecialMocs(Usage, AssignedMocsIdx, ClientRequest);
         }
 
@@ -203,9 +207,33 @@ void CTestXe_HP_CachePolicy::TearDownTestCase()
 {
 }
 
+TEST_F(CTestXe_HP_CachePolicy, Test_DG2_CachePolicy)
+{
+    SetUpPlatformVariant(IGFX_DG2);
+    CheckL3CachePolicy();
+    TearDownPlatformVariant();
+}
+
 TEST_F(CTestXe_HP_CachePolicy, Test_PVC_CachePolicy)
 {
     SetUpPlatformVariant(IGFX_PVC);
     CheckL3CachePolicy();
+    CheckPAT();
     TearDownPlatformVariant();
+}
+
+void CTestXe_HP_CachePolicy::CheckPAT()
+{
+    // Check Usage PAT index against PAT settings
+    for(unsigned long Usage = GMM_RESOURCE_USAGE_UNKNOWN; Usage < GMM_RESOURCE_USAGE_MAX; Usage++)
+    {
+        GMM_CACHE_POLICY_ELEMENT ClientRequest = pGmmULTClientContext->GetCachePolicyElement((GMM_RESOURCE_USAGE_TYPE)Usage);
+        if(ClientRequest.Initialized == false) // undefined resource in platform
+        {
+            continue;
+        }
+        unsigned long PATIndex = pGmmULTClientContext->CachePolicyGetPATIndex(NULL, (GMM_RESOURCE_USAGE_TYPE)Usage, NULL, false); 
+        //printf("Xe HPG: Usage: %d --> PAT Index: [%d]\n", Usage, PATIndex);
+        EXPECT_NE(PATIndex, GMM_PAT_ERROR) << "Usage# " << Usage << ": No matching PAT Index";
+    }
 }

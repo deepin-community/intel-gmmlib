@@ -25,13 +25,11 @@ OTHER DEALINGS IN THE SOFTWARE.
 #include "GmmConst.h"
 #include "../../../Platform/GmmPlatforms.h"
 
-#ifdef GMM_LIB_DLL
 #ifdef _WIN32
 #define GMM_MUTEX_HANDLE    HANDLE
 #else
 #include <pthread.h>
 #define GMM_MUTEX_HANDLE    pthread_mutex_t
-#endif
 #endif
 
 // Set packing alignment
@@ -81,8 +79,13 @@ namespace GmmLib
     class NON_PAGED_SECTION Context : public GmmMemAllocator
     {
     private:
-        static int32_t                   RefCount;
-        GMM_CLIENT                       ClientType;
+#if(!defined(__GMM_KMD__) && !GMM_LIB_DLL_MA)
+    	static int32_t                   RefCount;
+#endif
+#if GMM_LIB_DLL_MA
+        int32_t                          RefCount;
+#endif //GMM_LIB_DLL_MA
+	GMM_CLIENT                       ClientType;
         GMM_PLATFORM_INFO_CLASS*         pPlatformInfo;
 
         GMM_TEXTURE_CALC*                pTextureCalc;
@@ -105,24 +108,35 @@ namespace GmmLib
 
     #if(defined(__GMM_KMD__))
         uint64_t           IA32ePATTable;
-        GMM_PRIVATE_PAT     PrivatePATTable[GMM_NUM_PAT_ENTRIES];
-        int32_t                PrivatePATTableMemoryType[GMM_NUM_GFX_PAT_TYPES];
+	GMM_PRIVATE_PAT     PrivatePATTable[GMM_NUM_PAT_ENTRIES];
+	int32_t                PrivatePATTableMemoryType[GMM_NUM_GFX_PAT_TYPES];
     #endif
 
         // Padding Percentage limit on 64KB paged resource
         uint32_t               AllowedPaddingFor64KbPagesPercentage;
-        uint64_t              InternalGpuVaMax;
+        uint64_t               InternalGpuVaMax;
+        uint32_t               AllowedPaddingFor64KBTileSurf;
 
 #ifdef GMM_LIB_DLL
         // Mutex Object used for synchronization of ProcessSingleton Context
         static GMM_MUTEX_HANDLE           SingletonContextSyncMutex;
 #endif
-
+        GMM_PRIVATE_PAT PrivatePATTable[GMM_NUM_PAT_ENTRIES];
+        GMM_MUTEX_HANDLE SyncMutex;         // SyncMutex to protect access of Gmm UMD Lib process Singleton Context
     public :
         //Constructors and destructors
         Context();
         ~Context();
 
+        GMM_STATUS GMM_STDCALL          LockSingletonContextSyncMutex();
+        GMM_STATUS GMM_STDCALL          UnlockSingletonContextSyncMutex();
+
+#if GMM_LIB_DLL_MA
+        int32_t                         IncrementRefCount();
+        int32_t                         DecrementRefCount();
+#endif //GMM_LIB_DLL_MA
+
+#if(!defined(__GMM_KMD__) && (!GMM_LIB_DLL_MA))
         static int32_t IncrementRefCount()  // Returns the current RefCount and then increment it
         {
 #if defined(_WIN32)
@@ -155,7 +169,7 @@ namespace GmmLib
 
             return TargetValue;
         }
-
+#endif
         GMM_STATUS GMM_STDCALL InitContext(
                                     const PLATFORM& Platform,
                                     const SKU_FEATURE_TABLE* pSkuTable,
@@ -291,8 +305,25 @@ namespace GmmLib
         {
             return InternalGpuVaMax;
         }
+         /////////////////////////////////////////////////////////////////////////
+        /// Get padding  limit for 64k pages
+        /////////////////////////////////////////////////////////////////////////
+        uint32_t GetAllowedPaddingFor64KBTileSurf()
+        {
+            return (AllowedPaddingFor64KBTileSurf);
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+        /// Set padding  limit for 64k pages
+        /////////////////////////////////////////////////////////////////////////
+
+        GMM_INLINE void SetAllowedPaddingFor64KBTileSurf(uint32_t Value)
+        {
+            AllowedPaddingFor64KBTileSurf = Value;
+        }
 
     #ifdef GMM_LIB_DLL
+        ADAPTER_BDF             sBdf;  // Adpater's Bus, Device and Function info for which Gmm UMD Lib process Singleton Context is created
         #ifdef _WIN32
             // ProcessHeapVA Singleton HeapObj
             GMM_HEAP            *pHeapObj;
@@ -332,7 +363,7 @@ namespace GmmLib
                     SingletonContextSyncMutex = NULL;
                 }
             }
-
+            #if !GMM_LIB_DLL_MA
             /////////////////////////////////////////////////////////////////////////
             /// Acquire Sync Mutex for Singleton Context access
             /////////////////////////////////////////////////////////////////////////
@@ -364,6 +395,7 @@ namespace GmmLib
                     return GMM_ERROR;
                 }
             }
+            #endif //!GMM_LIB_DLL_MA
 
         #else // Non Win OS
 
@@ -374,7 +406,7 @@ namespace GmmLib
             {
                 pthread_mutex_destroy(&SingletonContextSyncMutex);
             }
-
+            #if !GMM_LIB_DLL_MA
             /////////////////////////////////////////////////////////////////////////
             /// Acquire Sync Mutex for Singleton Context access
             /////////////////////////////////////////////////////////////////////////
@@ -392,6 +424,7 @@ namespace GmmLib
                 pthread_mutex_unlock(&SingletonContextSyncMutex);
                 return GMM_SUCCESS;
             }
+            #endif //!GMM_LIB_DLL_MA
 
         #endif // _WIN32
 
@@ -535,20 +568,109 @@ namespace GmmLib
         {
             Override.pTextureCalc = pTextureCalc;
         }
-    #endif
+    #endif // (_DEBUG || _RELEASE_INTERNAL)
 
+    #endif // __GMM_KMD__
 
-    #endif
+    GMM_CACHE_POLICY* GMM_STDCALL CreateCachePolicyCommon();
+    GMM_TEXTURE_CALC* GMM_STDCALL CreateTextureCalc(PLATFORM Platform, bool Override);
+    GMM_PLATFORM_INFO_CLASS *GMM_STDCALL CreatePlatformInfo(PLATFORM Platform, bool Override);
+
     private: 
         void GMM_STDCALL OverrideSkuWa();
+        
+    public:
+    /////////////////////////////////////////////////////////////////////////
+    /// Returns private PAT table array ptr
+    /// @return   PAT array ptr
+    /////////////////////////////////////////////////////////////////////////
+    GMM_INLINE GMM_PRIVATE_PAT *GMM_STDCALL GetPrivatePATTable()
+    {
+        return (&PrivatePATTable[0]);
+    }
+    
     };
+
+// Max number of Multi-Adapters allowed in the system
+#define MAX_NUM_ADAPTERS      9
+//===========================================================================
+// typedef:
+//      _GMM_ADAPTER_INFO_
+//
+// Description:
+//      Struct holds Adapter level information.
+//----------------------------------------------------------------------------
+typedef struct _GMM_ADAPTER_INFO_
+{
+    Context             *pGmmLibContext;                    // Gmm UMD Lib Context which is process Singleton
+    _GMM_ADAPTER_INFO_  *pNext;                             // Linked List Next pointer to point to the Next Adapter node in the List
+
+}GMM_ADAPTER_INFO;
+    
+////////////////////////////////////////////////////////////////////////////////////
+/// Multi Adpater Context to hold data related to Multiple Adapters in the system
+/// Contains functions and members that are needed to support Multi-Adapter.
+///////////////////////////////////////////////////////////////////////////////////
+    class NON_PAGED_SECTION GmmMultiAdapterContext : public GmmMemAllocator
+    {
+    private:
+        GMM_ADAPTER_INFO                AdapterInfo[MAX_NUM_ADAPTERS];// For Static Initialization of adapter.
+        GMM_MUTEX_HANDLE                MAContextSyncMutex;         // SyncMutex to protect access of GmmMultiAdpaterContext
+        uint32_t                        NumAdapters;
+	void*                           pCpuReserveBase;
+	uint64_t                        CpuReserveSize;
+        GMM_ADAPTER_INFO                *pHeadNode;// For dynamic Initialization of adapter.
+                                                   // The Multi-Adapter Initialization is done dynamiclly using a Linked list Vector
+                                                   // pHeadNode points to the root node of the linked list and registers the first
+                                                   // adapter received from UMD.
+        // thread safe functions; these cannot be called within a LockMAContextSyncMutex block
+        GMM_ADAPTER_INFO *              GetAdapterNode(ADAPTER_BDF sBdf);   // Replacement for GetAdapterIndex, now get adapter node from the linked list
+
+        // Mutexes which protect the below thread unsafe functions
+        GMM_STATUS GMM_STDCALL          LockMAContextSyncMutex();
+        GMM_STATUS GMM_STDCALL          UnLockMAContextSyncMutex();
+
+        // thread unsafe functions; these must be protected with LockMAContextSyncMutex
+        GMM_ADAPTER_INFO *              GetAdapterNodeUnlocked(ADAPTER_BDF sBdf);
+        GMM_ADAPTER_INFO *              AddAdapterNode();
+        void                            RemoveAdapterNode(GMM_ADAPTER_INFO *pNode);
+
+    public:
+        //Constructors and destructors
+        GmmMultiAdapterContext();
+        ~GmmMultiAdapterContext();
+        /* Function prototypes */
+        /* Functions that update MultiAdapterContext members*/
+        uint32_t GMM_STDCALL            GetAdapterIndex(ADAPTER_BDF sBdf);
+        uint32_t GMM_STDCALL            GetNumAdapters();
+        /* Functions that update AdapterInfo*/
+        // thread safe functions; these cannot be called within a LockMAContextSyncMutex block
+#if LHDM
+        GMM_STATUS GMM_STDCALL          AddContext(const PLATFORM           Platform,
+                                                   const SKU_FEATURE_TABLE *pSkuTable,
+                                                   const WA_TABLE *         pWaTable,
+                                                   const GT_SYSTEM_INFO *   pGtSysInfo,
+                                                   ADAPTER_BDF              sBdf,
+                                                   const char *             DeviceRegistryPath);
+#else
+        GMM_STATUS GMM_STDCALL          AddContext(const PLATFORM Platform,
+                                                   const void *   pSkuTable,
+                                                   const void *   pWaTable,
+                                                   const void *   pGtSysInfo,
+                                                   ADAPTER_BDF    sBdf);
+#endif
+        GMM_STATUS GMM_STDCALL          RemoveContext(ADAPTER_BDF sBdf);
+        Context* GMM_STDCALL            GetAdapterLibContext(ADAPTER_BDF sBdf);
+    }; // GmmMultiAdapterContext
+
 } //namespace
 
-typedef GmmLib::Context GMM_GLOBAL_CONTEXT;
+typedef GmmLib::Context GMM_GLOBAL_CONTEXT, GMM_LIB_CONTEXT;
+typedef GmmLib::GmmMultiAdapterContext GMM_MA_LIB_CONTEXT;
 
 #else
 struct GmmLibContext;
-typedef struct GmmLibContext GMM_GLOBAL_CONTEXT;
+typedef struct GmmLibContext GMM_GLOBAL_CONTEXT, GMM_LIB_CONTEXT;
 #endif
 
 
@@ -556,12 +678,11 @@ typedef struct GmmLibContext GMM_GLOBAL_CONTEXT;
 void GMM_STDCALL GmmLinkKmdContextToGlobalInfo(GMM_GLOBAL_CONTEXT *pGmmLibContext, GMM_CONTEXT *pGmmKmdContext);
 #endif /*__GMM_KMD__*/
 
-
 //Declare all  GMM global context C interfaces.
 #ifdef __cplusplus
 extern "C" {
 #endif /*__cplusplus*/
-
+	
     const GMM_PLATFORM_INFO* GMM_STDCALL GmmGetPlatformInfo(GMM_GLOBAL_CONTEXT *pGmmLibContext);
     const GMM_CACHE_POLICY_ELEMENT* GmmGetCachePolicyUsage(GMM_GLOBAL_CONTEXT *pGmmLibContext);
           GMM_TEXTURE_CALC*         GmmGetTextureCalc(GMM_GLOBAL_CONTEXT *pGmmLibContext);
@@ -569,9 +690,8 @@ extern "C" {
     const WA_TABLE*                 GmmGetWaTable(GMM_GLOBAL_CONTEXT *pGmmLibContext);
     const GT_SYSTEM_INFO*           GmmGetGtSysInfo(GMM_GLOBAL_CONTEXT *pGmmLibContext);
 
-#ifdef __GMM_KMD__
+#ifdef __GMM_KMD__ 
     int32_t             GmmGetPrivatePATTableMemoryType(GMM_GLOBAL_CONTEXT *pGmmLibContext, GMM_GFX_PAT_TYPE PatType);
-    GMM_PRIVATE_PAT     GmmGetPrivatePATEntry(GMM_GLOBAL_CONTEXT *pGmmLibContext, uint32_t  PatIndex);
     GMM_CONTEXT*        GmmGetGmmKmdContext(GMM_GLOBAL_CONTEXT *pGmmLibContext);
     GMM_GTT_CONTEXT*    GmmGetGttContext(GMM_GLOBAL_CONTEXT *pGmmLibContext);
     GMM_CACHE_POLICY_TBL_ELEMENT GmmGetCachePolicyTblElement(GMM_GLOBAL_CONTEXT *pGmmLibContext, GMM_RESOURCE_USAGE_TYPE Usage);
@@ -579,28 +699,31 @@ extern "C" {
     void                GmmSetSkuTable(GMM_GLOBAL_CONTEXT *pGmmLibContext, SKU_FEATURE_TABLE SkuTable);
     void                GmmSetWaTable(GMM_GLOBAL_CONTEXT *pGmmLibContext, WA_TABLE WaTable);
     GMM_PLATFORM_INFO*  GmmKmdGetPlatformInfo(GMM_GLOBAL_CONTEXT *pGmmLibContext);
-
 #if(_DEBUG || _RELEASE_INTERNAL)
     const GMM_PLATFORM_INFO* GmmGetOverridePlatformInfo(GMM_GLOBAL_CONTEXT *pGmmLibContext);
     GMM_TEXTURE_CALC*   GmmGetOverrideTextureCalc(GMM_GLOBAL_CONTEXT *pGmmLibContext);
 #endif
 
 #endif
+    GMM_PRIVATE_PAT GmmGetPrivatePATEntry(GMM_LIB_CONTEXT *pGmmLibContext, uint32_t PatIndex);
 
 #ifdef __cplusplus
 }
 #endif /*__cplusplus*/
 
-    #define GMM_OVERRIDE_PLATFORM_INFO(pTexInfo)    (GmmGetPlatformInfo(pGmmGlobalContext))
-    #define GMM_OVERRIDE_TEXTURE_CALC(pTexInfo)     (GmmGetTextureCalc(pGmmGlobalContext))
+    #define GMM_OVERRIDE_PLATFORM_INFO(pTexInfo,pGmmLibContext)    (GmmGetPlatformInfo(pGmmLibContext))
+    #define GMM_OVERRIDE_TEXTURE_CALC(pTexInfo,pGmmLibContext)     (GmmGetTextureCalc(pGmmLibContext))
 
 #ifdef __GMM_KMD__
     #define GMM_OVERRIDE_EXPORTED_PLATFORM_INFO(pTexInfo)    GMM_OVERRIDE_PLATFORM_INFO(pTexInfo)
     #define GMM_IS_PLANAR(Format)                            GmmIsPlanar(Format)
 #else
-    #define GMM_OVERRIDE_EXPORTED_PLATFORM_INFO(pTexInfo)    (&pClientContext->GetPlatformInfo())
+    #define GMM_OVERRIDE_EXPORTED_PLATFORM_INFO(pTexInfo,pGmmLibContext)    (&((GmmClientContext*)pClientContext)->GetPlatformInfo())
     #define GMM_IS_PLANAR(Format)                            (pClientContext->IsPlanar(Format))
 #endif
+
+#define GMM_IS_1MB_AUX_TILEALIGNEDPLANES(Platform, Surf) \
+    ((GFX_GET_CURRENT_PRODUCT(Platform) >= IGFX_METEORLAKE) && Surf.OffsetInfo.PlaneXe_LPG.Is1MBAuxTAlignedPlanes)
 
 // Reset packing alignment to project default
 #pragma pack(pop)
