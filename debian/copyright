@@ -4,8 +4,7 @@ Source: https://github.com/intel/gmmlib
 Files-Excluded: Source/GmmLib/Utility/GmmLog/spdlog/*
 
 Files: *
-Copyright: 2016, Gabi Melman
-           2005-2020, Intel Corporation
+Copyright: 2005-2021, Intel Corporation
 License: Expat
 
 Files: Source/GmmLib/ULT/googletest/*
@@ -36,7 +35,7 @@ License: BSD-3-clause
 
 Files: debian/*
 Copyright: 2018 Timo Aaltonen <tjaalton@debian.org>
-           2018-2020 Sebastian Ramacher <sramacher@debian.org>
+           2018-2021 Sebastian Ramacher <sramacher@debian.org>
 License: Expat
 
 License: Expat

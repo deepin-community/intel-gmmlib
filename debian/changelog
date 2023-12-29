@@ -1,3 +1,155 @@
+intel-gmmlib (22.3.14+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.3.14+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 10 Dec 2023 00:13:08 +0100
+
+intel-gmmlib (22.3.12+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.3.12+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 15 Oct 2023 22:28:29 +0200
+
+intel-gmmlib (22.3.11+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.3.11+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sat, 02 Sep 2023 19:01:19 +0200
+
+intel-gmmlib (22.3.9+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.3.9+ds1
+    - Fix build on i386 (Closes: #1041474)
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Fri, 21 Jul 2023 22:03:26 +0200
+
+intel-gmmlib (22.3.7+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.3.7+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sat, 01 Jul 2023 18:04:44 +0200
+
+intel-gmmlib (22.3.6+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.3.6+ds1
+  * debian/patches: Refresh patches
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Thu, 08 Jun 2023 21:08:44 +0200
+
+intel-gmmlib (22.3.4+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.3.4+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Fri, 03 Mar 2023 21:29:17 +0100
+
+intel-gmmlib (22.3.3+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.3.3+ds1
+  * debian/control: Bump Standards-Version
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 15 Jan 2023 15:08:15 +0100
+
+intel-gmmlib (22.3.2+ds1-1) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * Set upstream metadata fields: Repository-Browse.
+
+  [ Sebastian Ramacher ]
+  * New upstream version 22.3.2+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Fri, 16 Dec 2022 23:44:26 +0100
+
+intel-gmmlib (22.3.1+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.3.1+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Mon, 21 Nov 2022 22:38:27 +0100
+
+intel-gmmlib (22.3.0+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.3.0+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 30 Oct 2022 21:08:18 +0100
+
+intel-gmmlib (22.2.1+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.2.1+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Wed, 19 Oct 2022 19:12:24 +0200
+
+intel-gmmlib (22.2.0+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.2.0+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Wed, 21 Sep 2022 21:42:32 +0200
+
+intel-gmmlib (22.1.8+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.1.8+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Wed, 07 Sep 2022 09:30:41 +0200
+
+intel-gmmlib (22.1.7+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.1.7+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Tue, 02 Aug 2022 21:07:30 +0200
+
+intel-gmmlib (22.1.5+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.1.5+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sat, 09 Jul 2022 15:32:35 +0200
+
+intel-gmmlib (22.1.3+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.1.3+ds1
+  * debian/control: Bump Standards-Version
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Thu, 26 May 2022 10:10:51 +0200
+
+intel-gmmlib (22.1.2+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.1.2+ds1
+    - Revert ABI breakage (Closes: #1007992)
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Fri, 25 Mar 2022 00:04:41 +0100
+
+intel-gmmlib (22.1.1+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.1.1+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sat, 19 Mar 2022 23:24:24 +0100
+
+intel-gmmlib (22.0.2+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.0.2+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Mon, 07 Feb 2022 22:16:56 +0100
+
+intel-gmmlib (22.0.1+ds1-1) unstable; urgency=medium
+
+  * Upload to unstable
+  * New upstream version 22.0.1+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Thu, 30 Dec 2021 22:12:03 +0100
+
+intel-gmmlib (22.0.0+ds1-1) experimental; urgency=medium
+
+  * New upstream version 22.0.0+ds1
+  * SONAME bump: libigdgmm11 -> libigdgmm12
+  * debian/copyright:
+    - Bump copyright years
+    - Remove Gabi Melman since spdlog is excluded
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 19 Dec 2021 10:50:08 +0100
+
+intel-gmmlib (21.3.3+ds1-1) unstable; urgency=medium
+
+  * New upstream version 21.3.3+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Fri, 19 Nov 2021 20:50:42 +0100
+
 intel-gmmlib (21.3.2+ds1-1) unstable; urgency=medium
 
   * New upstream version 21.3.2+ds1

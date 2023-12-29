@@ -746,8 +746,6 @@ TEST_F(CTestGen9Resource, Test2DTileYsMippedResource)
         uint32_t Mip1Height    = 0;
         uint32_t Mip2Height    = 0;
         uint32_t Mip3Height    = 0;
-        uint32_t Mip4Height    = 0;
-        uint32_t Mip5Height    = 0;
         uint32_t Mip2Higher    = 0; // Sum of aligned heights of Mip2 and above
         uint32_t MipTailHeight = 0;
         // Haligned Mip Widths
@@ -1132,8 +1130,6 @@ TEST_F(CTestGen9Resource, Test2DTileYfMippedResource)
         uint32_t Mip1Height    = 0;
         uint32_t Mip2Height    = 0;
         uint32_t Mip3Height    = 0;
-        uint32_t Mip4Height    = 0;
-        uint32_t Mip5Height    = 0;
         uint32_t Mip2Higher    = 0; // Sum of aligned heights of Mip2 and above
         uint32_t MipTailHeight = 0;
         // Haligned Mip Widths
@@ -4140,7 +4136,7 @@ TEST_F(CTestGen9Resource, TestCCS)
                 //{
                 //    ExpectedQPitch *= DepthSlice;
                 //}
-                //else { //TBD: Should 3D surface Aux QPitch be distance between R-slices or not
+                //else { // Should 3D surface Aux QPitch be distance between R-slices or not
                 // If it must be R-slice distance, compute 3D QPitch, remove depthslice from arraysize
                 VerifyResourceQPitch<true>(CCSResourceInfo, ExpectedQPitch); //verify false, else QPitch given for RT-size not CCS
                 //}
@@ -4158,7 +4154,7 @@ TEST_F(CTestGen9Resource, TestCCS)
         pGmmULTClientContext->DestroyResInfoObject(RTResourceInfo);
     } //Iterate through all input tuples
 
-    //TBD: Mip-mapped case
+    // Mip-mapped case
 }
 
 /// @brief ULT for MMC Resource

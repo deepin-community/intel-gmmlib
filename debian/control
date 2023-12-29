@@ -9,13 +9,13 @@ Build-Depends:
  debhelper-compat (= 13),
  cmake,
  libspdlog-dev
-Standards-Version: 4.6.0
+Standards-Version: 4.6.2
 Homepage: https://github.com/intel/gmmlib
 Vcs-Browser: https://salsa.debian.org/multimedia-team/intel-gmmlib
 Vcs-Git: https://salsa.debian.org/multimedia-team/intel-gmmlib.git
 Rules-Requires-Root: no
 
-Package: libigdgmm11
+Package: libigdgmm12
 Architecture: amd64 i386 x32
 Multi-Arch: same
 Depends:
@@ -35,7 +35,7 @@ Section: libdevel
 Architecture: amd64 i386 x32
 Multi-Arch: same
 Depends:
- libigdgmm11 (= ${binary:Version}),
+ libigdgmm12 (= ${binary:Version}),
  ${misc:Depends}
 Description: Intel Graphics Memory Management Library -- development files
  The Intel Graphics Memory Management Library provides device specific
