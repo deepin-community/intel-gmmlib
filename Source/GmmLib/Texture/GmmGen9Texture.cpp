@@ -153,8 +153,12 @@ GMM_STATUS GMM_STDCALL GmmLib::GmmGen9TextureCalc::FillTex1D(GMM_TEXTURE_INFO * 
     /////////////////////////////
     // Calculate Surface QPitch
     /////////////////////////////
-
-    Width    = __GMM_EXPAND_WIDTH(this, GFX_ULONG_CAST(pTexInfo->BaseWidth), HAlign, pTexInfo);
+    Width = GFX_ULONG_CAST(pTexInfo->BaseWidth);
+    if((pTexInfo->Format == GMM_FORMAT_R8G8B8_UINT) && (pTexInfo->Flags.Info.Linear || pTexInfo->Flags.Info.TiledX))
+    {
+        Width += GFX_CEIL_DIV(Width, 63);
+    }
+    Width    = __GMM_EXPAND_WIDTH(this, Width, HAlign, pTexInfo);
     MipWidth = Width;
 
     if((pTexInfo->Flags.Info.TiledYf || GMM_IS_64KB_TILE(pTexInfo->Flags)) &&
@@ -590,9 +594,15 @@ void GmmLib::GmmGen9TextureCalc::Fill2DTexOffsetAddress(GMM_TEXTURE_INFO *pTexIn
         // Calculate the overall Block height...Mip0Height + Max(Mip1Height, Sum of Mip2Height..MipnHeight)
         ArrayQPitch = Get2DMipMapTotalHeight(pTexInfo);
         ArrayQPitch = GFX_ALIGN_NP2(ArrayQPitch, Alignment);
-	    
+	
+	if (pTexInfo->Flags.Wa.SlicePitchPadding64KB)
+        {
+            // slice pitch padding to 64KB
+            ArrayQPitch = GFX_ALIGN_NP2(ArrayQPitch * (uint32_t)pTexInfo->Pitch, GMM_KBYTE(64)) / (uint32_t)pTexInfo->Pitch;
+        }
+	
 	// Color Surf with MSAA Enabled Mutiply 4
-        if(GMM_IS_64KB_TILE(pTexInfo->Flags) && (!pGmmLibContext->GetSkuTable().FtrTileY) &&
+        if (GMM_IS_64KB_TILE(pTexInfo->Flags) && (!pGmmLibContext->GetSkuTable().FtrTileY) && (!pGmmLibContext->GetSkuTable().FtrXe2PlusTiling) &&
            ((pTexInfo->MSAA.NumSamples == 8) || (pTexInfo->MSAA.NumSamples == 16)) &&
            ((pTexInfo->Flags.Gpu.Depth == 0) && (pTexInfo->Flags.Gpu.SeparateStencil == 0)))
         {

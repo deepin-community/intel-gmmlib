@@ -22,6 +22,8 @@ https://opensource.org/licenses/MIT
 Building
 ========
 1) Get gmmlib repository
+   
+   git clone https://github.com/intel/gmmlib.git
 
 2) Change it to root directory
 
@@ -33,7 +35,11 @@ Building
 
 4) Run the cmake command to prepare build files
 
-   ``$ cmake [-DCMAKE_BUILD_TYPE= Release | Debug | ReleaseInternal] ..``
+|        ``$ cmake [-DCMAKE_BUILD_TYPE=Release | Debug | ReleaseInternal] ..``  
+|        where,
+|        -DCMAKE_BUILD_TYPE can be set to one build type flag at a time.
+|        Example:
+|        ``$ cmake -DCMAKE_BUILD_TYPE=Release ..``, For Release build
 
 5) Build the project
 
@@ -81,6 +87,26 @@ XE_HP (XE_HP_SDV)
 XE_HPC (PVC: Ponte Vecchio)
 
 XE_HPG (DG2, ACM: Alchemist)
+
+Xe_LPG (MTL: Meteor Lake, ARL: Arrow Lake)
+
+Xe2_HPG (BMG: Battlemage, LNL: Lunar Lake)
+
+Xe3_LPG (Panther Lake)
+
+No code changes may be introduced knowingly, that would regress for any currently supported hardware.
+All contributions must ensure continued compatibility and functionality across all supported hardware platforms.
+Failure to maintain hardware compatibility may result in the rejection or reversion of the contribution.
+
+Any deliberate modifications or removal of hardware support will be transparently communicated.
+
+API options are solely considered as a stable interface.
+Any debug parameters, environmental variables and internal data structures are not considered as an interface and may be changed or removed at any time.
+
+To contribute, Create a pull request on https://github.com/intel/gmmlib with your changes. Ensure that your modifications build without errors.
+A maintainer will get in touch with you if there are any inquiries or concerns.
+
+If you have any feedback or questions, please open an issue through our repository interface: https://github.com/intel/gmmlib/issues
 
 Release Tags
 ============

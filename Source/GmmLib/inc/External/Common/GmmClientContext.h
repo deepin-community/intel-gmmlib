@@ -81,8 +81,12 @@ namespace GmmLib
     protected:
         GMM_CLIENT                       ClientType;
         ///< Placeholders for storing UMD context. Actual UMD context that needs to be stored here is 
-        void                             *pUmdAdapter;
-        GMM_UMD_CONTEXT                  *pGmmUmdContext;
+        union
+        {
+            void *pUmdAdapter;
+            GMM_AIL_STRUCT *pClientContextAilFlags; //To store the UMD AIL flags. This is applicable for each client. Used to populate the corresponding LibContextAilFlags
+        };
+	GMM_UMD_CONTEXT                  *pGmmUmdContext;
         GMM_DEVICE_CALLBACKS_INT          DeviceCB;       //OS-specific defn: Will be used by Clients to send as input arguments.
         // Flag to indicate Device_callbacks received.
         uint8_t             IsDeviceCbReceived;
@@ -176,6 +180,10 @@ namespace GmmLib
         GMM_VIRTUAL GMM_RESOURCE_INFO *GMM_STDCALL      CreateCustomResInfoObject_2(GMM_RESCREATE_CUSTOM_PARAMS_2 *pCreateParams);
 #endif
 	GMM_VIRTUAL uint32_t GMM_STDCALL CachePolicyGetPATIndex(GMM_RESOURCE_INFO *pResInfo, GMM_RESOURCE_USAGE_TYPE Usage, bool *pCompressionEnable, bool IsCpuCacheable);
+        GMM_VIRTUAL const SWIZZLE_DESCRIPTOR *GMM_STDCALL GetSwizzleDesc(EXTERNAL_SWIZZLE_NAME ExternalSwizzleName, EXTERNAL_RES_TYPE ResType, uint8_t bpe, bool isStdSwizzle = false);
+	
+	GMM_VIRTUAL void GMM_STDCALL            GmmSetAIL(GMM_AIL_STRUCT *pAilFlags);
+	GMM_VIRTUAL const uint64_t *GMM_STDCALL GmmGetAIL();
     };
 }
 
@@ -187,14 +195,13 @@ typedef struct GmmClientContext GMM_CLIENT_CONTEXT;
 
 #endif
 
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
     /* ClientContext will be unique to each client */
-    GMM_CLIENT_CONTEXT* GMM_STDCALL GmmCreateClientContextForAdapter(GMM_CLIENT ClientType, ADAPTER_BDF sBdf);
+    GMM_CLIENT_CONTEXT *GMM_STDCALL GmmCreateClientContextForAdapter(GMM_CLIENT ClientType, 
+		                               ADAPTER_BDF sBdf, const void *_pSkuTable);
     void GMM_STDCALL GmmDeleteClientContext(GMM_CLIENT_CONTEXT *pGmmClientContext);
 
 #if GMM_LIB_DLL
@@ -211,7 +218,8 @@ extern "C" {
                                                const void *   pSkuTable,
                                                const void *   pWaTable,
                                                const void *   pGtSysInfo,
-                                               ADAPTER_BDF    sBdf);
+                                               ADAPTER_BDF    sBdf,
+                                               const GMM_CLIENT ClientType);
 #endif
 
     void GMM_STDCALL GmmLibContextFree(ADAPTER_BDF sBdf);

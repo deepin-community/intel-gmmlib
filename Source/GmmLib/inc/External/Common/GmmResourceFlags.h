@@ -134,6 +134,10 @@ typedef struct GMM_RESOURCE_FLAG_REC
         uint32_t __PreWddm2SVM             : 1; // Internal GMM flag--Clients don't set.
         uint32_t Tile4                     : 1; // 4KB tile
         uint32_t Tile64                    : 1; // 64KB tile
+        uint32_t NotCompressed           : 1; // UMD to set this for a resource, this will be a request to GMM which need not be honoured always
+        uint32_t __MapCompressible       : 1; // Internal GMM flag which marks a resource as compressed during map, used for tracking
+        uint32_t __MapUnCompressible     : 1; // Internal GMM flag which marks a resource as not compressed during map, used for tracking
+		
     } Info;
 
     // Wa: Any Surface specific Work Around will go in here
@@ -153,7 +157,9 @@ typedef struct GMM_RESOURCE_FLAG_REC
 	uint32_t MediaPipeUsage                    : 1; // TileHeight Aligned ArrayQPitch on Tile4/TileY
         uint32_t ForceStdAllocAlign                : 1; // Align standard allocation to 2MB, allowing 64K-PageTable. Set by KMD, not be used by UMDs
         uint32_t DeniableLocalOnlyForCompression   : 1; // Align standard allocation to 2MB, allowing 64K-PageTable. Set by KMD, not be used by UMDs
-
+        uint32_t SlicePitchPadding64KB                : 1; // WA for MultiEngine compression, to enable slice pitch padding
+        uint32_t SizePadding64KB                      : 1; // WA for MultiEngine compression, to enable size padding to 64KB
+        uint32_t IgnoreMultiEngineCompression64KBWA   : 1; // ignore multi engine compression 64KB WA
     } Wa;
 
 } GMM_RESOURCE_FLAG;
