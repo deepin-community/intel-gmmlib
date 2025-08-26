@@ -351,6 +351,12 @@ GMM_STATUS GMM_STDCALL GmmLib::GmmXe_LPGTextureCalc::FillTexPlanar(GMM_TEXTURE_I
             pTexInfo->Flags.Gpu.CCS               = 0;
             pTexInfo->Flags.Gpu.UnifiedAuxSurface = 0;
             pTexInfo->Flags.Gpu.__NonMsaaTileYCcs = 0;
+            if (pGmmLibContext->GetSkuTable().FtrXe2Compression)
+            {
+                pTexInfo->Flags.Info.NotCompressed     = 1;
+                pTexInfo->Flags.Gpu.MCS                = 0;
+                pTexInfo->Flags.Gpu.IndirectClearColor = 0;
+            }
         }
     }
 
@@ -1024,12 +1030,12 @@ GMM_STATUS GmmLib::GmmXe_LPGTextureCalc::GetTexLockOffset(GMM_TEXTURE_INFO *   p
                 pReqInfo->Lock.Mip0SlicePitch = GFX_ULONG_CAST(pTexInfo->OffsetInfo.Texture3DOffsetInfo.Mip0SlicePitch);
 
                 // Actual address is offset based on requested slice
-                AddressOffset += SliceRow * MipHeight * Pitch;
+                AddressOffset += (GMM_GFX_SIZE_T)SliceRow * MipHeight * Pitch;
 
                 // Get to particular slice
                 if(Slice % NumberOfMipsInSingleRow)
                 {
-                    AddressOffset += (((Slice % NumberOfMipsInSingleRow) *
+                    AddressOffset += (((GMM_GFX_SIZE_T)(Slice % NumberOfMipsInSingleRow) *
                                        MipWidth * pTexInfo->BitsPerPixel) >>
                                       3);
                 }
@@ -1204,7 +1210,7 @@ void GmmLib::GmmXe_LPGTextureCalc::SetPlanarOffsetInfo(GMM_TEXTURE_INFO *pTexInf
     {
         pTexInfo->OffsetInfo.PlaneXe_LPG.IsTileAlignedPlanes = true;
     }
-    for(uint8_t i = 1; i <= CreateParams.NoOfPlanes; i++)
+    for(uint32_t i = 1; i <= CreateParams.NoOfPlanes; i++)
     {
         pTexInfo->OffsetInfo.PlaneXe_LPG.X[i] = CreateParams.PlaneOffset.X[i];
         pTexInfo->OffsetInfo.PlaneXe_LPG.Y[i] = CreateParams.PlaneOffset.Y[i];
@@ -1222,7 +1228,7 @@ void GmmLib::GmmXe_LPGTextureCalc::SetPlanarOffsetInfo_2(GMM_TEXTURE_INFO *pTexI
     {
         pTexInfo->OffsetInfo.PlaneXe_LPG.IsTileAlignedPlanes = true;
     }
-    for(uint8_t i = 1; i <= CreateParams.NoOfPlanes; i++)
+    for(uint32_t i = 1; i <= CreateParams.NoOfPlanes; i++)
     {
         pTexInfo->OffsetInfo.PlaneXe_LPG.X[i] = CreateParams.PlaneOffset.X[i];
         pTexInfo->OffsetInfo.PlaneXe_LPG.Y[i] = CreateParams.PlaneOffset.Y[i];
@@ -1339,4 +1345,3 @@ void GmmLib::GmmXe_LPGTextureCalc::GetBltInfoPerPlane(GMM_TEXTURE_INFO *pTexInfo
         pBlt->Sys.pData   = (char *)pBlt->Sys.pData + uint32_t(pBlt->Blt.Height * pBlt->Sys.RowPitch);
     }
 }
-

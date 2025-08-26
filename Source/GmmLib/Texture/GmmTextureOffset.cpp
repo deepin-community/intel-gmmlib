@@ -237,7 +237,7 @@ GMM_STATUS GmmLib::GmmTextureCalc::GetTexStdLayoutOffset(GMM_TEXTURE_INFO *   pT
                     pReqInfo->StdLayout.TileDepthPitch = DepthPitch;
                 }
 
-                PrevMipSize = DepthPitch * MipDepthTiles;
+                PrevMipSize = (GMM_GFX_SIZE_T)DepthPitch * MipDepthTiles;
                 SlicePitch += DepthPitch;
             }
 
@@ -352,12 +352,12 @@ GMM_STATUS GmmLib::GmmTextureCalc::GetTexLockOffset(GMM_TEXTURE_INFO *   pTexInf
                 pReqInfo->Lock.Mip0SlicePitch = GFX_ULONG_CAST(pTexInfo->OffsetInfo.Texture3DOffsetInfo.Mip0SlicePitch);
 
                 // Actual address is offset based on requested slice
-                AddressOffset += SliceRow * MipHeight * Pitch;
+                AddressOffset += (GMM_GFX_SIZE_T)SliceRow * MipHeight * Pitch;
 
                 // Get to particular slice
                 if(Slice % NumberOfMipsInSingleRow)
                 {
-                    AddressOffset += (((Slice % NumberOfMipsInSingleRow) *
+                    AddressOffset += (((GMM_GFX_SIZE_T)(Slice % NumberOfMipsInSingleRow) *
                                        MipWidth * pTexInfo->BitsPerPixel) >>
                                       3);
                 }
@@ -788,9 +788,9 @@ GMM_GFX_SIZE_T GmmLib::GmmTextureCalc::Get3DMipByteAddress(GMM_TEXTURE_INFO *   
             MipHeight /= 2;
         }
 
-        ExtraBytes = PlaneRows * MipHeight * Pitch;
+        ExtraBytes = (GMM_GFX_SIZE_T)PlaneRows * MipHeight * Pitch;
 
-        ExtraBytes += ((Slice % MipsInThisRow) *
+        ExtraBytes += ((GMM_GFX_SIZE_T)(Slice % MipsInThisRow) *
                        MipWidth * pTexInfo->BitsPerPixel) >>
                       3;
 
@@ -848,7 +848,7 @@ void GmmLib::GmmTextureCalc::SetPlanarOffsetInfo(GMM_TEXTURE_INFO *pTexInfo, GMM
     {
         pTexInfo->OffsetInfo.Plane.IsTileAlignedPlanes = true;
     }
-    for(uint8_t i = 1; i <= CreateParams.NoOfPlanes; i++)
+    for(uint32_t i = 1; i <= CreateParams.NoOfPlanes; i++)
     {
         pTexInfo->OffsetInfo.Plane.X[i] = CreateParams.PlaneOffset.X[i];
         pTexInfo->OffsetInfo.Plane.Y[i] = CreateParams.PlaneOffset.Y[i];
@@ -866,7 +866,7 @@ void GmmLib::GmmTextureCalc::SetPlanarOffsetInfo_2(GMM_TEXTURE_INFO *pTexInfo, G
     {
         pTexInfo->OffsetInfo.Plane.IsTileAlignedPlanes = true;
     }
-    for(uint8_t i = 1; i <= CreateParams.NoOfPlanes; i++)
+    for(uint32_t i = 1; i <= CreateParams.NoOfPlanes; i++)
     {
         pTexInfo->OffsetInfo.Plane.X[i] = CreateParams.PlaneOffset.X[i];
         pTexInfo->OffsetInfo.Plane.Y[i] = CreateParams.PlaneOffset.Y[i];

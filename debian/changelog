@@ -1,8 +1,76 @@
-intel-gmmlib (22.3.14+ds1-1deepin0) unstable; urgency=medium
+intel-gmmlib (22.8.1+ds1-1) unstable; urgency=medium
 
-  * No source change upload against GCC 12.
+  * New upstream version 22.8.1+ds1
 
- -- Tianyu Chen <sweetyfish@deepin.org>  Thu, 19 Sep 2024 22:50:02 +0800
+ -- Sebastian Ramacher <sramacher@debian.org>  Mon, 28 Jul 2025 09:26:45 +0200
+
+intel-gmmlib (22.7.2+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.7.2+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Fri, 23 May 2025 18:48:23 +0200
+
+intel-gmmlib (22.7.1+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.7.1+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 30 Mar 2025 14:04:52 +0200
+
+intel-gmmlib (22.7.0+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.7.0+ds1
+  * debian/control: Bump Standards-Version
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Thu, 13 Mar 2025 19:23:14 +0100
+
+intel-gmmlib (22.6.0+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.6.0+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sat, 28 Dec 2024 13:31:31 +0100
+
+intel-gmmlib (22.5.5+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.5.5+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 15 Dec 2024 20:50:16 +0100
+
+intel-gmmlib (22.5.2+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.5.2+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 20 Oct 2024 12:28:33 +0200
+
+intel-gmmlib (22.5.0+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.5.0+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 11 Aug 2024 19:39:36 +0200
+
+intel-gmmlib (22.4.1+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.4.1+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 14 Jul 2024 12:22:18 +0200
+
+intel-gmmlib (22.3.19+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.3.19+ds1
+  * debian/control: Bump Standards-Version
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Sun, 05 May 2024 18:50:18 +0200
+
+intel-gmmlib (22.3.17+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.3.17+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Wed, 07 Feb 2024 20:24:49 +0100
+
+intel-gmmlib (22.3.16+ds1-1) unstable; urgency=medium
+
+  * New upstream version 22.3.16+ds1
+
+ -- Sebastian Ramacher <sramacher@debian.org>  Fri, 29 Dec 2023 20:45:41 +0100
 
 intel-gmmlib (22.3.14+ds1-1) unstable; urgency=medium
 
